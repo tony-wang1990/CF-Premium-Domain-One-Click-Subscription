@@ -2,14 +2,25 @@ import express from 'express';
 import cors from 'cors';
 import schedule from 'node-schedule';
 import axios from 'axios';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { CollectorService } from './services/collector.js';
 import { SubscriptionService } from './services/subscription.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+    const clientPath = path.join(__dirname, '../../client/dist');
+    app.use(express.static(clientPath));
+}
 
 // Routes
 app.get('/api/domains', async (req, res) => {
@@ -156,6 +167,14 @@ CollectorService.getDomains().then(d => {
     if (d.length === 0) CollectorService.updateDomains();
 });
 
+// SPA fallback - must be last
+if (process.env.NODE_ENV === 'production') {
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
+    });
+}
+
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📡 Access at: http://localhost:${PORT}`);
 });

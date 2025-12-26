@@ -1,21 +1,20 @@
-version: '3'
+version: '3.8'
+
 services:
-  server:
-    build:
-      context: ./server
-    container_name: cf-optimizer-server
-    restart: always
+  cf-optimizer:
+    build: .
+    container_name: cf-optimizer
+    ports:
+      - "3000:3000"
     volumes:
       - ./data:/app/data
     environment:
+      - NODE_ENV=production
       - PORT=3000
-
-  client:
-    build:
-      context: ./client
-    container_name: cf-optimizer-client
-    restart: always
-    ports:
-      - "80:80"
-    depends_on:
-      - server
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/domains" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
