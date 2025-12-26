@@ -110,13 +110,6 @@ const ipInfos = ref<Record<string, IpInfo>>({
     location: '',
     url: ''
   },
-  ipsb: {
-    title: '国内查询 (IP.SB)',
-    desc: 'IP.SB API 提供的信息',
-    ip: '',
-    location: '',
-    url: ''
-  },
   aws: {
     title: 'AWS 检测',
     desc: 'Amazon AWS 看到的您的 IP',
@@ -152,7 +145,6 @@ const fetchNetworkStatus = async () => {
             
             // New items
             if(data.ip.ipApi) { ipInfos.value.ipApi.ip = data.ip.ipApi.ip; ipInfos.value.ipApi.location = data.ip.ipApi.location }
-            if(data.ip.ipsb) { ipInfos.value.ipsb.ip = data.ip.ipsb.ip; ipInfos.value.ipsb.location = data.ip.ipsb.location }
             if(data.ip.aws) { ipInfos.value.aws.ip = data.ip.aws.ip; ipInfos.value.aws.location = data.ip.aws.location }
         }
 

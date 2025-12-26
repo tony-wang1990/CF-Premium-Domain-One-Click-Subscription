@@ -115,14 +115,13 @@ app.get('/api/network-status', async (req, res) => {
         }
     };
 
-    const [domesticIp, abroadIp, cfIp, leakIp, twitterIp, ipApi, ipsbApi, awsIp] = await Promise.all([
-        getIp('http://pv.sohu.com/cityjson?ie=utf-8', 'sohu'),
+    const [domesticIp, abroadIp, cfIp, leakIp, twitterIp, ipApi, awsIp] = await Promise.all([
+        getIp('https://api.ip.sb/ip', 'text'), // Changed from sohu to ip.sb
         getIp('https://api.ipify.org?format=json'),
         getIp('https://www.cloudflare.com/cdn-cgi/trace'),
         getIp('https://ifconfig.co/json'),
         getIp('https://api.myip.com'),
         getIp('http://ip-api.com/json'),
-        getIp('https://api.ip.sb/ip', 'text'), // Replaced ipip.net with ip.sb
         getIp('https://checkip.amazonaws.com', 'text')
     ]);
 
@@ -149,7 +148,6 @@ app.get('/api/network-status', async (req, res) => {
             leak: leakIp,
             twitter: twitterIp,
             ipApi: ipApi,
-            ipsb: ipsbApi,
             aws: awsIp
         },
         latency: latencies
