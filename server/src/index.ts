@@ -64,6 +64,30 @@ app.post('/api/subscribe', async (req, res) => {
     }
 });
 
+// GET endpoint for shareable subscription URLs (without user speed data)
+app.get('/api/subscribe', async (req, res) => {
+    try {
+        const { url, max, max_latency, include, exclude } = req.query;
+        if (!url) return res.status(400).send('Missing url param');
+
+        const result = await SubscriptionService.generate(
+            url as string,
+            parseInt(max as string) || 10,
+            {
+                maxLatency: max_latency ? parseInt(max_latency as string) : undefined,
+                include: include as string,
+                exclude: exclude as string
+                // Note: GET endpoint doesn't use userSpeedData (uses server-side data as fallback)
+            }
+        );
+
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.send(result);
+    } catch (e: any) {
+        res.status(500).send(e.message);
+    }
+});
+
 app.get('/api/network-status', async (req, res) => {
     const measureLatency = async (url: string) => {
         const start = Date.now();
