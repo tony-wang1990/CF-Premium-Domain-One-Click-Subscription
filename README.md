@@ -41,7 +41,7 @@
 * **响应式布局**：完美适配 PC、平板、手机，随时随地管理节点。
 * **实时图表**：内置延迟走势图，丢包率一目了然。
 
-![项目主页](./client/public/docs/preview_home.png)
+![项目主页](./client/public/docs/home_clean.png)
 
 ---
 
