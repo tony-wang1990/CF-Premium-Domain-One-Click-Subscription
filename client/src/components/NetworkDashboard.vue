@@ -2,24 +2,28 @@
   <div class="network-dashboard dashboard-main-card">
     <div class="dashboard-header">
       <div class="section-title">
-        <span class="icon">●</span> 当前网络信息
+        <span class="icon">●</span> 网络环境检测
       </div>
+      <div class="header-hint">（IP由服务器检测，延迟由您的浏览器测试）</div>
     </div>
 
     <div class="dashboard-body">
-      <!-- IP Info Grid -->
-      <div class="ip-grid">
-        <div class="ip-card" v-for="(info, key) in ipInfos" :key="key">
-          <div class="card-title">
-            <span class="dot">●</span> {{ info.title }}
-          </div>
-          <div class="ip-value">{{ info.ip || '检测中...' }}</div>
-          <div class="ip-location">{{ info.location || 'Wait...' }}</div>
-          <div class="ip-desc">{{ info.desc }}</div>
+      <!-- Simplified IP Info - Just show key info -->
+      <div class="ip-summary">
+        <div class="ip-main">
+          <span class="ip-label">您的公网IP：</span>
+          <span class="ip-value-large">{{ ipInfos.domestic.ip || '检测中...' }}</span>
+          <span class="ip-loc">{{ ipInfos.domestic.location }}</span>
+        </div>
+        <div class="ip-secondary">
+          <span v-if="ipInfos.cloudflare.ip && ipInfos.cloudflare.ip !== 'Error'">
+            CF节点: {{ ipInfos.cloudflare.location }}
+          </span>
         </div>
       </div>
 
-      <!-- Latency Grid -->
+      <!-- Latency Grid - Core Feature -->
+      <div class="latency-section-title">📶 网站连通性测试（从您的位置测试）</div>
       <div class="latency-grid">
         <div class="latency-card" v-for="site in sites" :key="site.name">
           <div class="site-row">
@@ -29,7 +33,7 @@
             </div>
             <div class="site-stat">
               <span class="latency-ms" :class="getLatencyClass(site.latency)">
-                {{ site.latency === -1 ? '超时' : (site.latency ? site.latency + 'ms' : 'testing...') }}
+                {{ site.latency === -1 ? '超时' : (site.latency ? site.latency + 'ms' : '测试中...') }}
               </span>
               <n-tag size="tiny" :type="site.type === '国内' ? 'success' : 'info'" bordered>
                 {{ site.type }}
@@ -254,6 +258,65 @@ onMounted(() => {
 
 .section-title .icon {
   color: #10b981;
+}
+
+/* Header Hint */
+.header-hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* IP Summary - Simplified */
+.ip-summary {
+  background: var(--bg-body);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+}
+
+.ip-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ip-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.ip-value-large {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #f97316;
+  font-family: monospace;
+}
+
+.ip-loc {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  padding: 2px 8px;
+  background: rgba(249, 115, 22, 0.1);
+  border-radius: 4px;
+}
+
+.ip-secondary {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* Latency Section Title */
+.latency-section-title {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* IP Grid */
