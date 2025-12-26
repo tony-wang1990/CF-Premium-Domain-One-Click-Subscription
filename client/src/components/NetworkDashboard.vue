@@ -69,8 +69,8 @@ interface Site {
 
 const ipInfos = ref<Record<string, IpInfo>>({
   domestic: {
-    title: '您的IP地址',
-    desc: '您当前网络的真实IP地址',
+    title: '国内测试 (Sohu)',
+    desc: '通过搜狐API检测的公网IP',
     ip: '',
     location: '',
     url: ''
@@ -125,84 +125,56 @@ const sites = ref<Site[]>([
 
 const fetchNetworkStatus = async () => {
     try {
-        // Client-side IP detection using various CORS-enabled APIs
-        const getClientIP = async (url: string, parser: (data: any) => { ip: string; location: string }) => {
-            try {
-                const res = await fetch(url)
-                const data = typeof res.headers.get('content-type')?.includes('json') 
-                    ? await res.json() 
-                    : await res.text()
-                return parser(data)
-            } catch {
-                return { ip: 'Error', location: '' }
+        // Use backend for IP detection (bypass CORS and GFW restrictions)
+        const res = await fetch('/api/network-status')
+        const data = await res.json()
+        
+        // Update IPs from backend
+        if(data.ip) {
+            if(data.ip.domestic) { 
+                ipInfos.value.domestic.ip = data.ip.domestic.ip
+                ipInfos.value.domestic.location = data.ip.domestic.location 
             }
-        }
-
-        // Fetch IPs in parallel (client-side APIs only)
-        const [ipifyResult, cfResult, ifconfigResult, ipApiResult] = await Promise.all([
-            getClientIP('https://api.ipify.org?format=json', (data) => ({ 
-                ip: data.ip || 'Error', 
-                location: '' 
-            })),
-            getClientIP('https://www.cloudflare.com/cdn-cgi/trace', (data) => {
-                const lines = data.split('\n')
-                const ipLine = lines.find((l: string) => l.startsWith('ip='))
-                const locLine = lines.find((l: string) => l.startsWith('loc='))
-                return { 
-                    ip: ipLine?.split('=')[1] || 'Error', 
-                    location: locLine?.split('=')[1] || 'CF Node' 
-                }
-            }),
-            getClientIP('https://ifconfig.co/json', (data) => ({ 
-                ip: data.ip || 'Error', 
-                location: `${data.country || ''} ${data.city || ''}`.trim() 
-            })),
-            getClientIP('http://ip-api.com/json', (data) => ({ 
-                ip: data.query || 'Error', 
-                location: `${data.country || ''} ${data.isp || ''}`.trim() 
-            }))
-        ])
-
-        // Update UI with results
-        ipInfos.value.abroad.ip = ipifyResult.ip
-        ipInfos.value.abroad.location = ipifyResult.location || 'Wait...'
-        
-        ipInfos.value.cloudflare.ip = cfResult.ip
-        ipInfos.value.cloudflare.location = cfResult.location
-        
-        ipInfos.value.leak.ip = ifconfigResult.ip
-        ipInfos.value.leak.location = ifconfigResult.location || 'Unknown'
-        
-        ipInfos.value.ipApi.ip = ipApiResult.ip
-        ipInfos.value.ipApi.location = ipApiResult.location || 'Unknown'
-
-        // Use ipify as the primary "domestic" IP (it's your real IP)
-        ipInfos.value.domestic.ip = ipifyResult.ip
-        ipInfos.value.domestic.location = ipApiResult.location || 'Unknown'
-
-        // AWS check (may fail due to CORS)
-        try {
-            const awsRes = await fetch('https://checkip.amazonaws.com')
-            const awsIp = await awsRes.text()
-            ipInfos.value.aws.ip = awsIp.trim()
-            ipInfos.value.aws.location = 'Amazon AWS'
-        } catch {
-            ipInfos.value.aws.ip = ipifyResult.ip
-            ipInfos.value.aws.location = 'Unknown'
+            if(data.ip.abroad) { 
+                ipInfos.value.abroad.ip = data.ip.abroad.ip
+                ipInfos.value.abroad.location = data.ip.abroad.location 
+            }
+            if(data.ip.cloudflare) { 
+                ipInfos.value.cloudflare.ip = data.ip.cloudflare.ip
+                ipInfos.value.cloudflare.location = data.ip.cloudflare.location 
+            }
+            if(data.ip.leak) { 
+                ipInfos.value.leak.ip = data.ip.leak.ip
+                ipInfos.value.leak.location = data.ip.leak.location 
+            }
+            if(data.ip.ipApi) { 
+                ipInfos.value.ipApi.ip = data.ip.ipApi.ip
+                ipInfos.value.ipApi.location = data.ip.ipApi.location 
+            }
+            if(data.ip.aws) { 
+                ipInfos.value.aws.ip = data.ip.aws.ip
+                ipInfos.value.aws.location = data.ip.aws.location 
+            }
         }
 
         // Client-side latency testing (measure real connection time from browser)
         const measureBrowserLatency = async (url: string) => {
             try {
                 const start = performance.now()
+                const controller = new AbortController()
+                const timeoutId = setTimeout(() => controller.abort(), 5000)
+                
                 await fetch(url, { 
                     method: 'HEAD', 
                     mode: 'no-cors',
-                    cache: 'no-cache'
+                    cache: 'no-cache',
+                    signal: controller.signal
                 })
+                
+                clearTimeout(timeoutId)
                 const end = performance.now()
                 return Math.round(end - start)
-            } catch {
+            } catch (error) {
                 return -1
             }
         }

@@ -141,7 +141,7 @@ app.get('/api/network-status', async (req, res) => {
     };
 
     const [domesticIp, abroadIp, cfIp, leakIp, twitterIp, ipApi, awsIp] = await Promise.all([
-        getIp('https://api.ip.sb/ip', 'text'), // Changed from sohu to ip.sb
+        getIp('http://pv.sohu.com/cityjson?ie=utf-8', 'sohu'), // Sohu works in China
         getIp('https://api.ipify.org?format=json'),
         getIp('https://www.cloudflare.com/cdn-cgi/trace'),
         getIp('https://ifconfig.co/json'),
