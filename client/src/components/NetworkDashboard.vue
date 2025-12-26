@@ -110,9 +110,9 @@ const ipInfos = ref<Record<string, IpInfo>>({
     location: '',
     url: ''
   },
-  ipip: {
-    title: '国内查询 (IPIP.net)',
-    desc: '高精度国内 IP 库信息',
+  ipsb: {
+    title: '国内查询 (IP.SB)',
+    desc: 'IP.SB API 提供的信息',
     ip: '',
     location: '',
     url: ''
@@ -152,7 +152,7 @@ const fetchNetworkStatus = async () => {
             
             // New items
             if(data.ip.ipApi) { ipInfos.value.ipApi.ip = data.ip.ipApi.ip; ipInfos.value.ipApi.location = data.ip.ipApi.location }
-            if(data.ip.ipip) { ipInfos.value.ipip.ip = data.ip.ipip.ip; ipInfos.value.ipip.location = data.ip.ipip.location }
+            if(data.ip.ipsb) { ipInfos.value.ipsb.ip = data.ip.ipsb.ip; ipInfos.value.ipsb.location = data.ip.ipsb.location }
             if(data.ip.aws) { ipInfos.value.aws.ip = data.ip.aws.ip; ipInfos.value.aws.location = data.ip.aws.location }
         }
 
