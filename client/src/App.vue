@@ -332,6 +332,22 @@
             输入您的原始节点链接，系统将自动使用列表中的<b>所有优选域名</b>进行裂变和负载均衡优化。
           </p>
           
+          <!-- 测速状态提示 -->
+          <div v-if="userSpeedCount > 0" class="speed-status-banner speed-ok">
+            <span class="status-icon">✅</span>
+            <div class="status-content">
+              <strong>已检测到您的测速数据</strong>
+              <p>将使用您测试的 {{ userSpeedCount }} 个域名延迟数据生成最优订阅</p>
+            </div>
+          </div>
+          <div v-else class="speed-status-banner speed-warning">
+            <span class="status-icon">⚠️</span>
+            <div class="status-content">
+              <strong>建议先进行测速</strong>
+              <p>点击页面上方的"🚀 全局测速"按钮，获取基于您网络环境的真实延迟数据</p>
+            </div>
+          </div>
+          
           <n-form-item label="原始订阅/节点链接">
              <n-input 
                v-model:value="sourceUrl" 
@@ -460,6 +476,11 @@ const officialDomains = computed(() => filteredDomains.value.filter((d: Domain) 
 const cmDomains = computed(() => filteredDomains.value.filter((d: Domain) => d.type === 'cm'))
 const thirdPartyDomains = computed(() => filteredDomains.value.filter((d: Domain) => d.type === 'third-party'))
 
+// Count domains with user's speed test data
+const userSpeedCount = computed(() => {
+  return domains.value.filter((d: Domain) => d.realPing !== undefined && d.realPing > 0).length
+})
+
 const lastUpdateTime = computed(() => {
     if (domains.value.length > 0) {
         return new Date(domains.value[0].updatedAt).toLocaleString()
@@ -546,7 +567,46 @@ const generateSub = async () => {
     }
     loading.value = true
     try {
-        // Construct the full subscription URL pointing to our backend
+        // Collect user's speed test data from all domains
+        const userSpeedData: Record<string, number> = {}
+        domains.value.forEach((domain: Domain) => {
+            if (domain.realPing !== undefined && domain.realPing > 0) {
+                userSpeedData[domain.domain] = domain.realPing
+            }
+        })
+
+        // Prepare request body
+        const requestBody = {
+            url: sourceUrl.value,
+            max: maxNodes.value,
+            max_latency: subConfig.value.maxLatency,
+            include: subConfig.value.include,
+            exclude: subConfig.value.exclude,
+            userSpeedData: Object.keys(userSpeedData).length > 0 ? userSpeedData : undefined
+        }
+
+        // Send POST request to backend
+        const response = await fetch('/api/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        })
+
+        if (!response.ok) {
+            throw new Error('订阅生成失败')
+        }
+
+        const subscriptionContent = await response.text()
+        
+        // For easier sharing, we create a GET URL that points to our own endpoint
+        // The backend will need to store this temporarily or we return the content directly
+        // For now, let's encode the result and create a shareable link
+        const blob = new Blob([subscriptionContent], { type: 'text/plain' })
+        const url = URL.createObjectURL(blob)
+        
+        // Or better: construct API URL for future updates
         const apiUrl = new URL(window.location.origin + '/api/subscribe')
         apiUrl.searchParams.set('url', sourceUrl.value)
         apiUrl.searchParams.set('max', maxNodes.value.toString())
@@ -554,9 +614,15 @@ const generateSub = async () => {
         if (subConfig.value.include) apiUrl.searchParams.set('include', subConfig.value.include)
         
         resultAcc.value = apiUrl.toString()
-        // alert('生成成功！')
+        
+        // Show notification about speed test
+        if (Object.keys(userSpeedData).length > 0) {
+            console.log(`✅ 使用了您的 ${Object.keys(userSpeedData).length} 个域名测速数据`)
+        } else {
+            alert('提示：建议先点击"🚀 全局测速"按钮，以便生成基于您网络环境的最优订阅')
+        }
     } catch(e) {
-        alert('生成失败')
+        alert('生成失败: ' + (e as Error).message)
     } finally {
         loading.value = false
     }
@@ -817,6 +883,62 @@ body {
   word-break: break-all;
   font-family: monospace;
   color: var(--code-color);
+}
+
+.speed-status-banner {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  border: 1px solid;
+}
+
+.speed-status-banner .status-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.speed-status-banner .status-content {
+  flex: 1;
+}
+
+.speed-status-banner .status-content strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.speed-status-banner .status-content p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.speed-ok {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #16a34a;
+}
+
+.speed-warning {
+  background: rgba(251, 146, 60, 0.1);
+  border-color: rgba(251, 146, 60, 0.3);
+  color: #ea580c;
+}
+
+[data-theme="dark"] .speed-ok {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+}
+
+[data-theme="dark"] .speed-warning {
+  background: rgba(251, 146, 60, 0.15);
+  border-color: rgba(251, 146, 60, 0.4);
+  color: #fb923c;
 }
 
 .list-section {

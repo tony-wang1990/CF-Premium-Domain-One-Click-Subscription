@@ -41,9 +41,9 @@ app.post('/api/refresh', async (req, res) => {
     }
 });
 
-app.get('/api/subscribe', async (req, res) => {
+app.post('/api/subscribe', async (req, res) => {
     try {
-        const { url, max, max_latency, include, exclude } = req.query;
+        const { url, max, max_latency, include, exclude, userSpeedData } = req.body;
         if (!url) return res.status(400).send('Missing url param');
 
         const result = await SubscriptionService.generate(
@@ -52,7 +52,8 @@ app.get('/api/subscribe', async (req, res) => {
             {
                 maxLatency: max_latency ? parseInt(max_latency as string) : undefined,
                 include: include as string,
-                exclude: exclude as string
+                exclude: exclude as string,
+                userSpeedData: userSpeedData as Record<string, number> // User's speed test data
             }
         );
 

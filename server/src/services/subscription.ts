@@ -6,15 +6,32 @@ export class SubscriptionService {
     static async generate(
         sourceUrl: string,
         maxNodes: number = 10,
-        options: { maxLatency?: number; include?: string; exclude?: string } = {}
+        options: {
+            maxLatency?: number;
+            include?: string;
+            exclude?: string;
+            userSpeedData?: Record<string, number>; // User's client-side speed test results
+        } = {}
     ): Promise<string> {
-        // 1. Get Domains (sorted by speed)
+        // 1. Get Domains
         let domains = await CollectorService.getDomains();
         if (domains.length === 0) {
             domains = await CollectorService.updateDomains();
         }
 
-        // Filter by Max Latency
+        // Apply user's speed test data if provided
+        if (options.userSpeedData && Object.keys(options.userSpeedData).length > 0) {
+            domains = domains.map(d => ({
+                ...d,
+                speed: options.userSpeedData![d.domain] !== undefined
+                    ? options.userSpeedData![d.domain]
+                    : d.speed || 9999
+            }));
+            // Sort by user's speed data
+            domains.sort((a, b) => (a.speed || 9999) - (b.speed || 9999));
+        }
+
+        // Filter by Max Latency (now using user's data if provided)
         if (options.maxLatency) {
             domains = domains.filter(d => (d.speed || 9999) <= options.maxLatency!);
         }
