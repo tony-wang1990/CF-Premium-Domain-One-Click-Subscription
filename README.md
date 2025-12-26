@@ -276,4 +276,4 @@ CF-Premium-Domain-One-Click-Subscription/
 
 ---
 
-Created with ❤️ by CloudFlare 优选团队
+Created with ❤️ by LaoWang
