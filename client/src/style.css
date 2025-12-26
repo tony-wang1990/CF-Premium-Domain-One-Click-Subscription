@@ -1,0 +1,226 @@
+/* Global styles moved to App.vue for dynamic theming */
+
+.app-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: -webkit-flex;
+  display: flex;
+  -ms-flex-direction: column;
+  flex-direction: column;
+
+}
+
+/* Nav */
+.nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 1rem 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -ms-flex-align: center;
+  align-items: center;
+
+
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+@supports (backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px)) {
+  .nav-bar {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+}
+
+.logo>*+* {
+  margin-left: 0.5rem;
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.nav-actions {
+  display: flex;
+}
+
+.nav-actions>*+* {
+  margin-left: 1rem;
+}
+
+/* Hero */
+.hero-section {
+  text-align: center;
+  margin: 3rem 0 4rem;
+  padding: 0 1rem;
+}
+
+.hero-section h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: #60a5fa;
+  /* Fallback color for IE */
+  color: transparent;
+
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+/* Domain Sections */
+.domain-section {
+  margin-bottom: 4rem;
+  padding: 0 1.5rem;
+}
+
+.section-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.section-badge.official {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+
+.section-badge.cm {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.section-badge.third {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+.domain-section h2 {
+  margin: 0.5rem 0 1rem;
+  font-size: 1.8rem;
+}
+
+.section-desc {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.section-desc .tip {
+  color: #fbbf24;
+  font-size: 0.9rem;
+}
+
+/* Grid */
+/* Grid style removed as unused */
+
+.domain-card {
+  background: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.domain-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.card-header {
+  display: flex;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -ms-flex-align: center;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.domain-name {
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #e2e8f0;
+}
+
+.card-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  height: 2.4em;
+  /* fixed height for alignment */
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.card-actions {
+  display: flex;
+}
+
+.card-actions>*+* {
+  margin-left: 0.5rem;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--glass-border);
+  margin-top: auto;
+}
+
+/* Modal */
+.modal-desc {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.result-box {
+  margin-top: 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px dashed var(--glass-border);
+}
+
+.result-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.result-code {
+  display: block;
+  word-break: break-all;
+  font-family: monospace;
+  color: #a5f3fc;
+  font-size: 0.9rem;
+}
+
+/* Naive UI Overrides */
+.n-modal-mask {
+  @supports (backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px)) {
+    .n-modal-mask {
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+  }
+
+}

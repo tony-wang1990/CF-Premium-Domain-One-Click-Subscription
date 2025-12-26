@@ -1,0 +1,21 @@
+version: '3'
+services:
+  server:
+    build:
+      context: ./server
+    container_name: cf-optimizer-server
+    restart: always
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PORT=3000
+
+  client:
+    build:
+      context: ./client
+    container_name: cf-optimizer-client
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - server

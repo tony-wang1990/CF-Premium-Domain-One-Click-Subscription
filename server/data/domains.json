@@ -1,0 +1,226 @@
+[
+  {
+    "id": "d3d3LnZpc2EuY24=",
+    "domain": "www.visa.cn",
+    "type": "official",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "bWZhLmdvdi51YQ==",
+    "domain": "mfa.gov.ua",
+    "type": "official",
+    "description": "乌克兰外交部",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "d3d3LnNob3BpZnkuY29t",
+    "domain": "www.shopify.com",
+    "type": "official",
+    "description": "Shopify官方优选",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "c3RvcmUudWJpLmNvbQ==",
+    "domain": "store.ubi.com",
+    "type": "official",
+    "description": "Ubisoft",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "c3RhdGljZGVsaXZlcnkubmV4dXNtb2RzLmNvbQ==",
+    "domain": "staticdelivery.nexusmods.com",
+    "type": "official",
+    "description": "NexusMods",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "dGltZS5pcw==",
+    "domain": "time.is",
+    "type": "official",
+    "description": "官方优选",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "aWNvb2suaGs=",
+    "domain": "icook.hk",
+    "type": "official",
+    "description": "官方优选",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "aWNvb2sudHc=",
+    "domain": "icook.tw",
+    "type": "official",
+    "description": "官方优选",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2xvdWRmbGFyZS1kbC5ieW9pcC50b3A=",
+    "domain": "cloudflare-dl.byoip.top",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2YuODc3Nzc0Lnh5eg==",
+    "domain": "cf.877774.xyz",
+    "type": "cm",
+    "description": "秋名山维护",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "c2Fhcy5zaW4uZmFu",
+    "domain": "saas.sin.fan",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "YmVzdGNmLjAzMDEwMS54eXo=",
+    "domain": "bestcf.030101.xyz",
+    "type": "official",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2RuLjIwMjAxMTEueHl6",
+    "domain": "cdn.2020111.xyz",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2Rucy5kb29uLmV1Lm9yZw==",
+    "domain": "cdns.doon.eu.org",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2YuMHNtLmNvbQ==",
+    "domain": "cf.0sm.com",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2YuODc3NzcxLnh5eg==",
+    "domain": "cf.877771.xyz",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2YuOTAwNTAxLnh5eg==",
+    "domain": "cf.900501.xyz",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2ZpcC4xMzIzMTIzLnh5eg==",
+    "domain": "cfip.1323123.xyz",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2ZpcC5jZmNkbi52aXA=",
+    "domain": "cfip.cfcdn.vip",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2ZpcC54eHh4eHh4eC50aw==",
+    "domain": "cfip.xxxxxxxx.tk",
+    "type": "cm",
+    "description": "OTC维护",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2xvdWRmbGFyZS4xODI2ODIueHl6",
+    "domain": "cloudflare.182682.xyz",
+    "type": "cm",
+    "description": "WeTest",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Y2xvdWRmbGFyZS1pcC5tb2Zhc2hpLmx0ZA==",
+    "domain": "cloudflare-ip.mofashi.ltd",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Zm4uMTMwNTE5Lnh5eg==",
+    "domain": "fn.130519.xyz",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "ZnJlZXl4LmNsb3VkZmxhcmU4OC5ldS5vcmc=",
+    "domain": "freeyx.cloudflare88.eu.org",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "bnJ0Lnh4eHh4eHh4Lm55Yy5tbg==",
+    "domain": "nrt.xxxxxxxx.nyc.mn",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "bnJ0Y2ZkbnMuem9uZS5pZA==",
+    "domain": "nrtcfdns.zone.id",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "dGVuY2VudGFwcC5jbg==",
+    "domain": "tencentapp.cn",
+    "type": "cm",
+    "description": "ktff维护",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "eG4tLWI2Z2FjLmV1Lm9yZw==",
+    "domain": "xn--b6gac.eu.org",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "Nzc3LmFpNzc3Nzc3Ny54eXo=",
+    "domain": "777.ai7777777.xyz",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.336Z"
+  },
+  {
+    "id": "dnBzNzg5LmNvbQ==",
+    "domain": "vps789.com",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.337Z"
+  },
+  {
+    "id": "aXBkYi5hcGkuMDMwMTAxLnh5eg==",
+    "domain": "ipdb.api.030101.xyz",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.337Z"
+  },
+  {
+    "id": "d2V0ZXN0LnZpcA==",
+    "domain": "wetest.vip",
+    "type": "cm",
+    "description": "Cloudflare Optimized",
+    "updatedAt": "2025-12-23T10:15:30.337Z"
+  }
+]
