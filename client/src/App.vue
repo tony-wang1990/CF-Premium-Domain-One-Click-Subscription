@@ -112,55 +112,47 @@
                 </div>
               </div>
 
-              <!-- Right: 24h Ping Chart (Simulated) -->
+              <!-- Right: User's Ping History Chart -->
               <div class="monitor-right">
                 <div class="chart-header">
-                  <span class="chart-title">24小时ping (实时更新中，数据每20分钟刷新一次)</span>
-                  <span class="chart-time">{{ new Date(Date.now() - 86400000).toLocaleString() }} - {{ new Date().toLocaleString() }}</span>
+                  <span class="chart-title">📊 您的测速历史（浏览器本地）</span>
+                  <span class="chart-time">点击测速按钮累积数据</span>
                 </div>
                 
                 <div class="chart-row">
-                  <span class="chart-label">电信</span>
+                  <span class="chart-label">延迟</span>
                   <div class="timeline-track">
-                    <div v-for="n in 40" :key="n" class="time-bit" :class="getBitClass(item.speed || 9999, n)"></div>
+                    <div v-for="(point, idx) in getUserPingHistory(item.domain)" :key="idx" 
+                         class="time-bit" 
+                         :class="getHistoryBitClass(point.latency)"
+                         :title="`${new Date(point.time).toLocaleString()}: ${point.latency}ms`">
+                    </div>
+                    <!-- Fill empty slots -->
+                    <div v-for="n in Math.max(0, 40 - getUserPingHistory(item.domain).length)" 
+                         :key="'empty-' + n" 
+                         class="time-bit bit-empty">
+                    </div>
                   </div>
-                  <span class="chart-val">{{ formatLatency(item.speed || 9999, 1) }}</span>
+                  <span class="chart-val">{{ getAvgLatency(item.domain) }}</span>
                 </div>
 
-                <div class="chart-row">
-                  <span class="chart-label">移动</span>
-                  <div class="timeline-track">
-                    <div v-for="n in 40" :key="n" class="time-bit" :class="getBitClass(item.speed || 9999, n, 0.9)"></div>
-                  </div>
-                  <span class="chart-val">{{ formatLatency(item.speed || 9999, 0.9) }}</span>
+                <div class="history-stats" v-if="getUserPingHistory(item.domain).length > 0">
+                  <span>📈 已记录 {{ getUserPingHistory(item.domain).length }} 次测速</span>
+                  <span>⏱️ 最新: {{ item.realPing || getPingHistory(item.domain).slice(-1)[0]?.latency || '-' }}ms</span>
                 </div>
-
-                <div class="chart-row">
-                  <span class="chart-label">联通</span>
-                  <div class="timeline-track">
-                    <div v-for="n in 40" :key="n" class="time-bit" :class="getBitClass(item.speed || 9999, n, 1.1)"></div>
-                  </div>
-                  <span class="chart-val">{{ formatLatency(item.speed || 9999, 1.1) }}</span>
-                </div>
-
-                <!-- Time Axis -->
-                <div class="time-axis">
-                    <span>15:55</span>
-                    <span>21:55</span>
-                    <span>03:55</span>
-                    <span>09:55</span>
-                    <span>15:55</span>
+                <div class="history-empty" v-else>
+                  <span>💡 点击左侧"测速"按钮开始记录</span>
                 </div>
 
                 <div class="chart-footer">
                      <div class="chart-legend">
-                       <div class="legend-title">丢包率:</div>
-                       <div class="legend-i"><span class="bit-sample green"></span> 0%</div>
-                       <div class="legend-i"><span class="bit-sample yellow"></span> 0~10%</div>
-                       <div class="legend-i"><span class="bit-sample red"></span> >10%</div>
-                       <div class="legend-i"><span class="bit-sample gray"></span> 失联</div>
+                       <div class="legend-title">延迟:</div>
+                       <div class="legend-i"><span class="bit-sample green"></span> &lt;100ms</div>
+                       <div class="legend-i"><span class="bit-sample yellow"></span> 100-300ms</div>
+                       <div class="legend-i"><span class="bit-sample red"></span> &gt;300ms</div>
+                       <div class="legend-i"><span class="bit-sample gray"></span> 超时</div>
                     </div>
-                    <div class="chart-val-legend">平均延迟/丢包率</div>
+                    <div class="chart-val-legend">平均延迟</div>
                 </div>
               </div>
             </div>
@@ -639,9 +631,7 @@ const checkPing = async (item: Domain) => {
     const start = performance.now()
     try {
         // Use Image load trick for rough latency estimation (CORS safe-ish)
-        // Or fetch with no-cors (opaque response)
         const img = new Image()
-        // Determine protocol - usually http/https. Default to https for testing.
         const protocol = window.location.protocol === 'https:' ? 'https://' : 'http://'
         
         const p = new Promise<void>((resolve, reject) => {
@@ -650,7 +640,6 @@ const checkPing = async (item: Domain) => {
             setTimeout(() => reject(), 5000) // 5s timeout
         })
         
-        // Cache bursting
         img.src = `${protocol}${item.domain}/favicon.ico?t=${Date.now()}`
         
         await p
@@ -660,7 +649,54 @@ const checkPing = async (item: Domain) => {
         item.realPing = 9999 // Timeout
     } finally {
         item.isPinging = false
+        
+        // Save to localStorage for history chart
+        if (item.realPing !== undefined) {
+            savePingHistory(item.domain, item.realPing)
+        }
     }
+}
+
+// Save ping history to localStorage (max 40 data points per domain)
+const savePingHistory = (domain: string, latency: number) => {
+    const key = `ping_history_${domain}`
+    let history: { time: number; latency: number }[] = []
+    
+    try {
+        const stored = localStorage.getItem(key)
+        if (stored) {
+            history = JSON.parse(stored)
+        }
+    } catch {
+        history = []
+    }
+    
+    // Add new data point
+    history.push({
+        time: Date.now(),
+        latency: latency
+    })
+    
+    // Keep only last 40 data points
+    if (history.length > 40) {
+        history = history.slice(-40)
+    }
+    
+    localStorage.setItem(key, JSON.stringify(history))
+}
+
+// Get ping history from localStorage
+const getPingHistory = (domain: string): { time: number; latency: number }[] => {
+    const key = `ping_history_${domain}`
+    try {
+        const stored = localStorage.getItem(key)
+        if (stored) {
+            return JSON.parse(stored)
+        }
+    } catch {
+        // ignore
+    }
+    return []
 }
 
 const pingAll = async () => {
@@ -685,6 +721,31 @@ const getRegionFlag = (region?: string) => {
         case 'Global': return '🌐'
         default: return '🌐'
     }
+}
+
+// Get user's ping history for display (wrapper function for template)
+const getUserPingHistory = (domain: string) => {
+    return getPingHistory(domain)
+}
+
+// Get CSS class for history chart bit based on latency
+const getHistoryBitClass = (latency: number) => {
+    if (latency >= 9999) return 'bit-gray'
+    if (latency < 100) return 'bit-green'
+    if (latency < 300) return 'bit-yellow'
+    return 'bit-red'
+}
+
+// Calculate average latency from history
+const getAvgLatency = (domain: string) => {
+    const history = getPingHistory(domain)
+    if (history.length === 0) return '-'
+    
+    const validPings = history.filter(h => h.latency < 9999)
+    if (validPings.length === 0) return '超时'
+    
+    const avg = Math.round(validPings.reduce((sum, h) => sum + h.latency, 0) / validPings.length)
+    return `${avg}ms`
 }
 
 onMounted(() => {
@@ -1155,8 +1216,26 @@ body {
 .bit-green { background: #4ade80; }
 .bit-yellow { background: #facc15; }
 .bit-red { background: #ef4444; }
+.bit-empty { background: var(--border-color); opacity: 0.3; }
 
 [data-theme='dark'] .bit-gray { background: #334155; }
+[data-theme='dark'] .bit-empty { background: #1e293b; opacity: 0.5; }
+
+.history-stats {
+  display: flex;
+  gap: 20px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 10px;
+}
+
+.history-empty {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  margin-top: 10px;
+  font-style: italic;
+}
 
 .chart-val {
     width: 80px;
