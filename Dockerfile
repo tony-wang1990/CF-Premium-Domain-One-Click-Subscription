@@ -1,4 +1,5 @@
 # Multi-stage build for CF-Optimizer
+# Supports: AMD64 (x86_64) and ARM64 (Oracle Cloud, Raspberry Pi)
 FROM node:18-alpine AS frontend-builder
 
 WORKDIR /app/client

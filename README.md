@@ -82,11 +82,29 @@ docker-compose pull
 docker-compose up -d
 ```
 
+> **💡 架构支持**: Docker 镜像支持 **AMD64** 和 **ARM64** 架构，可直接部署到甲骨文云（Oracle Cloud）的免费 ARM 服务器。
+
+**甲骨文云 ARM 服务器部署**:
+
+```bash
+# 在甲骨文云 ARM 实例上
+sudo apt update && sudo apt install -y docker.io docker-compose
+sudo systemctl enable docker
+git clone https://github.com/tony-wang1990/CF-Premium-Domain-One-Click-Subscription.git
+cd CF-Premium-Domain-One-Click-Subscription
+sudo docker-compose up -d
+
+# 开放防火墙端口
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 3000 -j ACCEPT
+sudo netfilter-persistent save
+```
+
 ---
 
 ### 方式二: VPS 部署
 
 **环境要求**:
+
 * Node.js >= 18.x
 * npm / yarn
 * (可选) Nginx 做反向代理
@@ -192,7 +210,8 @@ docker-compose up -d
 
 ### 环境要求
 
-- Node.js >= 16.x
+* Node.js >= 16.x
+
 * npm / yarn
 
 ### 步骤
