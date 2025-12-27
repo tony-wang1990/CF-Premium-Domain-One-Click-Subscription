@@ -43,22 +43,25 @@
 
         <!-- 🔥 醒目的全局测速提示 -->
         <div class="speed-test-banner" v-if="!hasTestedSpeed">
-          <div class="banner-content">
+          <div class="banner-left">
             <span class="banner-icon">🚀</span>
             <div class="banner-text">
               <strong>第一步：点击测速</strong>
               <p>测试您的网络到各CF域名的延迟，找出最快的节点</p>
             </div>
-            <n-button type="warning" size="large" @click="pingAll" :loading="isGlobalPinging">
-              {{ isGlobalPinging ? '测速中...' : '🚀 开始全局测速' }}
-            </n-button>
           </div>
+          <button class="big-test-btn" @click="pingAll" :disabled="isGlobalPinging">
+            <span v-if="!isGlobalPinging">🚀 开始全局测速</span>
+            <span v-else class="testing-status">
+              ⏳ 测速中... {{ testedCount }}/{{ domains.length }}
+            </span>
+          </button>
         </div>
         <div class="speed-test-done" v-else>
-          <span>✅ 已测速 {{ testedCount }} 个域名</span>
-          <n-button size="small" type="info" dashed @click="pingAll" :loading="isGlobalPinging">
-            重新测速
-          </n-button>
+          <span>✅ 已测速 {{ testedCount }} 个域名，点击"按延迟排序"查看最快节点</span>
+          <button class="retest-btn" @click="pingAll" :disabled="isGlobalPinging">
+            {{ isGlobalPinging ? '测速中...' : '🔄 重新测速' }}
+          </button>
         </div>
 
         <!-- Search & Filter Section -->
@@ -946,18 +949,22 @@ body {
 
 /* 🔥 Speed Test Banner Styles */
 .speed-test-banner {
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   border-radius: 12px;
   padding: 20px 25px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
-}
-
-.banner-content {
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 20px;
   flex-wrap: wrap;
+}
+
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 .banner-icon {
@@ -965,7 +972,6 @@ body {
 }
 
 .banner-text {
-  flex: 1;
   min-width: 200px;
 }
 
@@ -982,21 +988,80 @@ body {
   font-size: 0.9rem;
 }
 
+/* 大号测速按钮 */
+.big-test-btn {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 18px 40px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+  min-width: 220px;
+  text-align: center;
+}
+
+.big-test-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5);
+}
+
+.big-test-btn:disabled {
+  opacity: 0.9;
+  cursor: wait;
+}
+
+.testing-status {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* 测速完成状态 */
 .speed-test-done {
   background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  border-radius: 8px;
-  padding: 12px 20px;
+  border: 2px solid rgba(34, 197, 94, 0.4);
+  border-radius: 10px;
+  padding: 15px 25px;
   margin-bottom: 15px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 15px;
+  flex-wrap: wrap;
 }
 
 .speed-test-done span {
   color: #22c55e;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.retest-btn {
+  background: transparent;
+  border: 2px solid #3b82f6;
+  color: #3b82f6;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.retest-btn:hover:not(:disabled) {
+  background: #3b82f6;
+  color: white;
+}
+
+.retest-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }
 
 /* Update previous styles to use variables */
