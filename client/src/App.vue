@@ -1016,6 +1016,14 @@ onMounted(async () => {
     fetchBatchIspSpeed()
     // 获取24小时历史数据
     fetchBatchIspHistory()
+    
+    // 🔄 自动刷新：每5分钟自动刷新域名和三网数据
+    setInterval(() => {
+        console.log('🔄 Auto-refreshing domains and ISP data...')
+        fetchDomains()
+        fetchBatchIspSpeed()
+        fetchBatchIspHistory()
+    }, 5 * 60 * 1000) // 5分钟
 })
 </script>
 
