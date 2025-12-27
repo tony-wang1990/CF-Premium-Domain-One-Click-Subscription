@@ -132,10 +132,10 @@
                 </div>
               </div>
 
-              <!-- Right: 三网测速数据 (来自API) -->
+              <!-- Right: 24小时三网测速 (真实历史数据) -->
               <div class="monitor-right">
                 <div class="chart-header">
-                  <span class="chart-title">📊 三网延迟 (数据每20分钟刷新)</span>
+                  <span class="chart-title">📊 24小时ping (数据每20分钟刷新一次)</span>
                   <a :href="'https://www.itdog.cn/tcping/' + item.domain + ':443'" target="_blank" class="tcping-link">TCPing</a>
                 </div>
                 
@@ -143,30 +143,42 @@
                 <div class="chart-row">
                   <span class="chart-label ct">电信</span>
                   <div class="timeline-track">
-                    <div v-for="n in 40" :key="'ct-'+n" class="time-bit" 
-                         :class="getIspBitClass(item.domain, 'ct', n)"></div>
+                    <div v-for="(bit, idx) in getHistoryBits(item.domain, 'ct')" 
+                         :key="'ct-'+idx" 
+                         class="time-bit" 
+                         :class="bit.color"
+                         :title="'丢包率: ' + (bit.loss * 100).toFixed(1) + '%'">
+                    </div>
                   </div>
-                  <span class="chart-val">{{ getIspData(item.domain, 'ct').latency }}/{{ getIspData(item.domain, 'ct').lossRate }}</span>
+                  <span class="chart-val">{{ getIspAverage(item.domain, 'ct').latency }}/{{ getIspAverage(item.domain, 'ct').lossRate }}</span>
                 </div>
 
                 <!-- 移动 -->
                 <div class="chart-row">
                   <span class="chart-label cm">移动</span>
                   <div class="timeline-track">
-                    <div v-for="n in 40" :key="'cm-'+n" class="time-bit" 
-                         :class="getIspBitClass(item.domain, 'cm', n)"></div>
+                    <div v-for="(bit, idx) in getHistoryBits(item.domain, 'cm')" 
+                         :key="'cm-'+idx" 
+                         class="time-bit" 
+                         :class="bit.color"
+                         :title="'丢包率: ' + (bit.loss * 100).toFixed(1) + '%'">
+                    </div>
                   </div>
-                  <span class="chart-val">{{ getIspData(item.domain, 'cm').latency }}/{{ getIspData(item.domain, 'cm').lossRate }}</span>
+                  <span class="chart-val">{{ getIspAverage(item.domain, 'cm').latency }}/{{ getIspAverage(item.domain, 'cm').lossRate }}</span>
                 </div>
 
                 <!-- 联通 -->
                 <div class="chart-row">
                   <span class="chart-label cu">联通</span>
                   <div class="timeline-track">
-                    <div v-for="n in 40" :key="'cu-'+n" class="time-bit" 
-                         :class="getIspBitClass(item.domain, 'cu', n)"></div>
+                    <div v-for="(bit, idx) in getHistoryBits(item.domain, 'cu')" 
+                         :key="'cu-'+idx" 
+                         class="time-bit" 
+                         :class="bit.color"
+                         :title="'丢包率: ' + (bit.loss * 100).toFixed(1) + '%'">
+                    </div>
                   </div>
-                  <span class="chart-val">{{ getIspData(item.domain, 'cu').latency }}/{{ getIspData(item.domain, 'cu').lossRate }}</span>
+                  <span class="chart-val">{{ getIspAverage(item.domain, 'cu').latency }}/{{ getIspAverage(item.domain, 'cu').lossRate }}</span>
                 </div>
 
                 <div class="chart-footer">
@@ -514,6 +526,83 @@ const fetchBatchIspSpeed = async () => {
     }
 }
 
+// 24小时历史数据存储
+interface HistoryPoint {
+    timestamp: string;
+    ct: { latency: number; lossRate: number };
+    cm: { latency: number; lossRate: number };
+    cu: { latency: number; lossRate: number };
+}
+const ispHistoryData = ref<Record<string, HistoryPoint[]>>({})
+
+// 获取域名的24小时历史数据
+const fetchIspHistory = async (domain: string) => {
+    try {
+        const res = await fetch(`/api/isp-history/${encodeURIComponent(domain)}`)
+        const data = await res.json()
+        if (data.success && data.history) {
+            ispHistoryData.value[domain] = data.history
+        }
+    } catch (e) {
+        console.error('Failed to fetch ISP history:', e)
+    }
+}
+
+// 批量获取历史数据
+const fetchBatchIspHistory = async () => {
+    const domainList = domains.value.slice(0, 20).map(d => d.domain)
+    for (const domain of domainList) {
+        await fetchIspHistory(domain)
+    }
+}
+
+// 获取历史数据用于图表显示（返回72个点，不足的补灰色）
+const getHistoryBits = (domain: string, isp: 'ct' | 'cm' | 'cu') => {
+    const history = ispHistoryData.value[domain] || []
+    const bits: Array<{ color: string; loss: number }> = []
+    
+    // 填充历史数据点
+    for (const point of history) {
+        const lossRate = point[isp].lossRate
+        let color = 'bit-green'
+        if (lossRate > 0.1) color = 'bit-red'
+        else if (lossRate > 0) color = 'bit-yellow'
+        bits.push({ color, loss: lossRate })
+    }
+    
+    // 不足72个点的补空
+    while (bits.length < 72) {
+        bits.unshift({ color: 'bit-empty', loss: 0 })
+    }
+    
+    return bits.slice(-72) // 只取最近72个点
+}
+
+// 计算ISP平均延迟和丢包率
+const getIspAverage = (domain: string, isp: 'ct' | 'cm' | 'cu') => {
+    const history = ispHistoryData.value[domain] || []
+    if (history.length === 0) {
+        // 没有历史数据时使用当前数据
+        const current = ispSpeedData.value[domain]
+        if (!current) return { latency: '-', lossRate: '-' }
+        return {
+            latency: current[isp].latency + 'ms',
+            lossRate: (current[isp].lossRate * 100).toFixed(2) + '%'
+        }
+    }
+    
+    const total = history.reduce((acc, p) => ({
+        latency: acc.latency + p[isp].latency,
+        loss: acc.loss + p[isp].lossRate
+    }), { latency: 0, loss: 0 })
+    
+    return {
+        latency: Math.round(total.latency / history.length) + 'ms',
+        lossRate: ((total.loss / history.length) * 100).toFixed(2) + '%'
+    }
+}
+
+
 // Computed Grouping
 // Computed Grouping with Filter & Sort
 const filteredDomains = computed(() => {
@@ -858,6 +947,8 @@ onMounted(async () => {
     await fetchDomains()
     // 获取三网测速数据
     fetchBatchIspSpeed()
+    // 获取24小时历史数据
+    fetchBatchIspHistory()
 })
 </script>
 

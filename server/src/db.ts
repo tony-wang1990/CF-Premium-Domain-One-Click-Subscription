@@ -22,6 +22,8 @@ export async function getDb() {
     });
 
     const db = await dbPromise;
+
+    // Domains table
     await db.exec(`
         CREATE TABLE IF NOT EXISTS domains (
             id TEXT PRIMARY KEY,
@@ -31,6 +33,27 @@ export async function getDb() {
             updatedAt TEXT NOT NULL,
             speed INTEGER
         )
+    `);
+
+    // ISP Speed History table - stores 24h data
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS isp_speed_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            domain TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            ct_latency INTEGER,
+            ct_loss REAL,
+            cm_latency INTEGER,
+            cm_loss REAL,
+            cu_latency INTEGER,
+            cu_loss REAL
+        )
+    `);
+
+    // Create index for faster queries
+    await db.exec(`
+        CREATE INDEX IF NOT EXISTS idx_isp_speed_domain_time 
+        ON isp_speed_history(domain, timestamp)
     `);
 
     return db;

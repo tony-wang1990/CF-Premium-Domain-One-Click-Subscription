@@ -152,6 +152,17 @@ app.post('/api/isp-speed/batch', async (req, res) => {
     }
 });
 
+// 获取域名的24小时三网历史数据
+app.get('/api/isp-history/:domain', async (req, res) => {
+    try {
+        const domain = req.params.domain;
+        const history = await IspSpeedService.getSpeedHistory(domain);
+        res.json({ success: true, domain, history });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.get('/api/network-status', async (req, res) => {
     const measureLatency = async (url: string) => {
         const start = Date.now();
@@ -249,9 +260,17 @@ schedule.scheduleJob('*/20 * * * *', () => {
     CollectorService.updateDomains();
 });
 
+// 每20分钟采集三网测速数据
+schedule.scheduleJob('*/20 * * * *', () => {
+    console.log('📊 Running scheduled ISP speed collection (every 20m)...');
+    IspSpeedService.collectAndSaveAll();
+});
+
 // Initial load
 CollectorService.getDomains().then(d => {
     if (d.length === 0) CollectorService.updateDomains();
+    // 启动时立即采集一次三网数据
+    setTimeout(() => IspSpeedService.collectAndSaveAll(), 5000);
 });
 
 // SPA fallback - must be last

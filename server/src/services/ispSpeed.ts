@@ -147,4 +147,98 @@ export class IspSpeedService {
         }
         return [];
     }
+
+    /**
+     * 保存三网测速历史到数据库
+     */
+    static async saveSpeedHistory(domain: string, data: IspSpeedData): Promise<void> {
+        const { getDb } = await import('../db.js');
+        const db = await getDb();
+
+        await db.run(`
+            INSERT INTO isp_speed_history 
+            (domain, timestamp, ct_latency, ct_loss, cm_latency, cm_loss, cu_latency, cu_loss)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+            domain,
+            new Date().toISOString(),
+            data.ct.latency,
+            data.ct.lossRate,
+            data.cm.latency,
+            data.cm.lossRate,
+            data.cu.latency,
+            data.cu.lossRate
+        ]);
+    }
+
+    /**
+     * 获取域名24小时历史数据（72个点，每20分钟一个）
+     */
+    static async getSpeedHistory(domain: string): Promise<Array<{
+        timestamp: string;
+        ct: { latency: number; lossRate: number };
+        cm: { latency: number; lossRate: number };
+        cu: { latency: number; lossRate: number };
+    }>> {
+        const { getDb } = await import('../db.js');
+        const db = await getDb();
+
+        const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+        const rows = await db.all(`
+            SELECT timestamp, ct_latency, ct_loss, cm_latency, cm_loss, cu_latency, cu_loss
+            FROM isp_speed_history
+            WHERE domain = ? AND timestamp > ?
+            ORDER BY timestamp ASC
+            LIMIT 72
+        `, [domain, since]);
+
+        return rows.map((row: any) => ({
+            timestamp: row.timestamp,
+            ct: { latency: row.ct_latency, lossRate: row.ct_loss },
+            cm: { latency: row.cm_latency, lossRate: row.cm_loss },
+            cu: { latency: row.cu_latency, lossRate: row.cu_loss }
+        }));
+    }
+
+    /**
+     * 清理超过24小时的历史数据
+     */
+    static async cleanOldHistory(): Promise<void> {
+        const { getDb } = await import('../db.js');
+        const db = await getDb();
+
+        const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        await db.run('DELETE FROM isp_speed_history WHERE timestamp < ?', [cutoff]);
+    }
+
+    /**
+     * 采集并保存所有域名的三网数据（定时任务调用）
+     */
+    static async collectAndSaveAll(): Promise<void> {
+        const { CollectorService } = await import('./collector.js');
+        const domains = await CollectorService.getDomains();
+
+        console.log(`📊 Collecting ISP speed data for ${domains.length} domains...`);
+
+        // 取前20个主要域名进行采集
+        const topDomains = domains.slice(0, 20);
+
+        for (const domain of topDomains) {
+            try {
+                const data = await this.getIspSpeed(domain.domain);
+                if (data) {
+                    await this.saveSpeedHistory(domain.domain, data);
+                }
+            } catch (e) {
+                console.error(`Failed to collect for ${domain.domain}:`, e);
+            }
+        }
+
+        // 清理旧数据
+        await this.cleanOldHistory();
+
+        console.log(`✅ ISP speed data collected and saved.`);
+    }
 }
+
