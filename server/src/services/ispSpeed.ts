@@ -219,18 +219,10 @@ export class IspSpeedService {
         const { CollectorService } = await import('./collector.js');
         const domains = await CollectorService.getDomains();
 
-        console.log(`📊 Collecting ISP speed data for ${domains.length} domains...`);
+        console.log(`📊 Collecting ISP speed data for ALL ${domains.length} domains...`);
 
-        // 按类型分组，每类采集10个，确保所有类型都有数据
-        const officialDomains = domains.filter((d: any) => d.type === 'official' || !d.type).slice(0, 10);
-        const cmDomains = domains.filter((d: any) => d.type === 'cm').slice(0, 10);
-        const thirdPartyDomains = domains.filter((d: any) => d.type === 'third-party').slice(0, 10);
-
-        const domainsToCollect = [...officialDomains, ...cmDomains, ...thirdPartyDomains];
-
-        console.log(`📊 Collecting: ${officialDomains.length} official, ${cmDomains.length} cm, ${thirdPartyDomains.length} third-party`);
-
-        for (const domain of domainsToCollect) {
+        // 采集所有域名（不再限制数量）
+        for (const domain of domains) {
             try {
                 const data = await this.getIspSpeed(domain.domain);
                 if (data) {
@@ -244,7 +236,7 @@ export class IspSpeedService {
         // 清理旧数据
         await this.cleanOldHistory();
 
-        console.log(`✅ ISP speed data collected and saved.`);
+        console.log(`✅ ISP speed data collected for ${domains.length} domains.`);
     }
 }
 
