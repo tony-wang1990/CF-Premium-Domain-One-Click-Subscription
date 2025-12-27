@@ -132,10 +132,10 @@
                 </div>
               </div>
 
-              <!-- Right: 24小时三网测速 (真实历史数据) -->
+              <!-- Right: 24小时三网测速 (全国参考数据) -->
               <div class="monitor-right">
                 <div class="chart-header">
-                  <span class="chart-title">📊 24小时ping (数据每20分钟刷新一次)</span>
+                  <span class="chart-title">📊 全国三网参考 <span class="data-source-note">(点击左侧测速获取您的真实延迟)</span></span>
                   <a :href="'https://www.itdog.cn/tcping/' + item.domain + ':443'" target="_blank" class="tcping-link">TCPing</a>
                 </div>
                 
@@ -238,7 +238,7 @@
               <!-- Right: 24小时三网测速 (真实历史数据) -->
               <div class="monitor-right">
                 <div class="chart-header">
-                  <span class="chart-title">📊 24小时ping (数据每20分钟刷新一次)</span>
+                  <span class="chart-title">📊 全国三网参考 <span class="data-source-note">(点击左侧测速获取您的真实延迟)</span></span>
                   <a :href="'https://www.itdog.cn/tcping/' + item.domain + ':443'" target="_blank" class="tcping-link">TCPing</a>
                 </div>
                 
@@ -333,7 +333,7 @@
               <!-- Right: 24小时三网测速 (真实历史数据) -->
               <div class="monitor-right">
                 <div class="chart-header">
-                  <span class="chart-title">📊 24小时ping (数据每20分钟刷新一次)</span>
+                  <span class="chart-title">📊 全国三网参考 <span class="data-source-note">(点击左侧测速获取您的真实延迟)</span></span>
                   <a :href="'https://www.itdog.cn/tcping/' + item.domain + ':443'" target="_blank" class="tcping-link">TCPing</a>
                 </div>
                 
@@ -1619,6 +1619,12 @@ body {
 
 .chart-title {
     font-weight: bold;
+}
+
+.data-source-note {
+    font-size: 0.75rem;
+    color: #f97316;
+    font-weight: normal;
 }
 
 .chart-time {
