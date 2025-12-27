@@ -135,7 +135,7 @@ export class CollectorService {
                     domain = domain.replace(/^\.+/, '');
 
                     // If comment exists in scrape, use it, otherwise use previously defined description or generic
-                    const desc = match[2] || (currentType === 'official' ? 'Official Optimized' : 'Community Optimized');
+                    const desc = match[2] || (currentType === 'official' ? '官方优选' : '社区优选');
 
                     // Filter noise and common file extensions
                     // 1. Exact match ignore list

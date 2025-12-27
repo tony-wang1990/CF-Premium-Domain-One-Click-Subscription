@@ -109,9 +109,6 @@
                     <span class="tag-pill soft">泛域名</span>
                     <span class="tag-pill pink">🔥 三网优选</span>
                   </div>
-                  <button class="btn-ghost" @click="copy(item.domain)">
-                    &lt; &gt; TCPing
-                  </button>
                   <button class="btn-ghost" @click="checkPing(item)" :class="{'pinging': item.isPinging}">
                     <span v-if="item.realPing" :class="getPingColor(item.realPing)">{{ item.realPing }}ms</span>
                     <span v-else>{{ item.isPinging ? '...' : '📶 测速' }}</span>
@@ -217,9 +214,6 @@
                     <span class="tag-pill soft">泛域名</span>
                     <span class="tag-pill pink">移动直连</span>
                   </div>
-                   <button class="btn-ghost" @click="copy(item.domain)">
-                    &lt; &gt; TCPing
-                  </button>
                   <button class="btn-ghost" @click="checkPing(item)" :class="{'pinging': item.isPinging}">
                     <span v-if="item.realPing" :class="getPingColor(item.realPing)">{{ item.realPing }}ms</span>
                     <span v-else>{{ item.isPinging ? '...' : '📶 测速' }}</span>
@@ -313,9 +307,6 @@
                   <div class="domain-btn-orange">
                     <span class="icon">{{ getRegionFlag(item.region) }}</span> {{ item.domain }}
                   </div>
-                  <button class="btn-ghost" @click="copy(item.domain)">
-                    &lt; &gt; TCPing
-                  </button>
                   <button class="btn-ghost" @click="checkPing(item)" :class="{'pinging': item.isPinging}">
                     <span v-if="item.realPing" :class="getPingColor(item.realPing)">{{ item.realPing }}ms</span>
                     <span v-else>{{ item.isPinging ? '...' : '📶 测速' }}</span>
@@ -962,14 +953,7 @@ const getPingColor = (ms: number) => {
 }
 
 const getRegionFlag = (region?: string) => {
-    switch(region) {
-        case 'US': return '🇺🇸'
-        case 'HK': return '🇭🇰'
-        case 'SG': return '🇸🇬'
-        case 'JP': return '🇯🇵'
-        case 'Global': return '🌐'
-        default: return '🌐'
-    }
+    return '⚡'
 }
 
 // Get user's ping history for display (wrapper function for template)
