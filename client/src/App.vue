@@ -370,11 +370,15 @@
              </div>
              
              <div v-if="resultAcc" class="result-box">
-                <div class="result-label">您的专属优选订阅链接：</div>
-                <code class="result-code">{{ resultAcc }}</code>
-                <n-button size="small" type="success" dashed block @click="copyResult" style="margin-top: 10px">
-                  复制链接
-                </n-button>
+                <div class="result-status">{{ resultAcc }}</div>
+                <div v-if="generatedSubscription" class="result-actions">
+                  <n-button type="success" block @click="copyResult" style="margin-top: 10px">
+                    📋 复制订阅内容（粘贴到代理客户端）
+                  </n-button>
+                  <div class="result-hint">
+                    💡 提示：复制后，在代理客户端（如v2rayN、Clash）中创建新订阅，粘贴内容即可
+                  </div>
+                </div>
              </div>
           </template>
         </n-card>
@@ -433,6 +437,7 @@ const sourceUrl = ref('')
 const maxNodes = ref(15)
 const loading = ref(false)
 const resultAcc = ref('')
+const generatedSubscription = ref('') // Stores actual subscription content for copying
 
 // Computed Grouping
 // Computed Grouping with Filter & Sort
@@ -567,7 +572,16 @@ const generateSub = async () => {
             }
         })
 
-        // Prepare request body
+        // Check if user has tested speeds
+        if (Object.keys(userSpeedData).length === 0) {
+            const confirmed = confirm('⚠️ 您还没有进行测速！\n\n建议先点击"🚀 全局测速"按钮，这样生成的订阅才是基于您网络环境的最优节点。\n\n点击"确定"继续（使用默认数据），点击"取消"去测速。')
+            if (!confirmed) {
+                loading.value = false
+                return
+            }
+        }
+
+        // Prepare request body with user's speed data
         const requestBody = {
             url: sourceUrl.value,
             max: maxNodes.value,
@@ -577,7 +591,7 @@ const generateSub = async () => {
             userSpeedData: Object.keys(userSpeedData).length > 0 ? userSpeedData : undefined
         }
 
-        // Send POST request to backend
+        // Send POST request to backend - this uses user's speed data!
         const response = await fetch('/api/subscribe', {
             method: 'POST',
             headers: {
@@ -592,27 +606,20 @@ const generateSub = async () => {
 
         const subscriptionContent = await response.text()
         
-        // For easier sharing, we create a GET URL that points to our own endpoint
-        // The backend will need to store this temporarily or we return the content directly
-        // For now, let's encode the result and create a shareable link
-        const blob = new Blob([subscriptionContent], { type: 'text/plain' })
-        const url = URL.createObjectURL(blob)
+        // Create a blob URL for direct download/copy
+        const blob = new Blob([subscriptionContent], { type: 'text/plain;charset=utf-8' })
+        const blobUrl = URL.createObjectURL(blob)
         
-        // Or better: construct API URL for future updates
-        const apiUrl = new URL(window.location.origin + '/api/subscribe')
-        apiUrl.searchParams.set('url', sourceUrl.value)
-        apiUrl.searchParams.set('max', maxNodes.value.toString())
-        if (subConfig.value.maxLatency) apiUrl.searchParams.set('max_latency', subConfig.value.maxLatency.toString())
-        if (subConfig.value.include) apiUrl.searchParams.set('include', subConfig.value.include)
+        // Store the actual content for copying
+        generatedSubscription.value = subscriptionContent
         
-        resultAcc.value = apiUrl.toString()
-        
-        // Show notification about speed test
+        // For display, show a hint that this is optimized based on their network
         if (Object.keys(userSpeedData).length > 0) {
-            console.log(`✅ 使用了您的 ${Object.keys(userSpeedData).length} 个域名测速数据`)
+            resultAcc.value = `✅ 已基于您的 ${Object.keys(userSpeedData).length} 个域名测速结果生成优选订阅（共${subscriptionContent.split('\n').length}个节点）`
         } else {
-            alert('提示：建议先点击"🚀 全局测速"按钮，以便生成基于您网络环境的最优订阅')
+            resultAcc.value = `⚠️ 使用默认数据生成订阅（建议下次先测速）`
         }
+        
     } catch(e) {
         alert('生成失败: ' + (e as Error).message)
     } finally {
@@ -621,8 +628,12 @@ const generateSub = async () => {
 }
 
 const copyResult = () => {
-    navigator.clipboard.writeText(resultAcc.value)
-    alert('订阅链接已复制')
+    if (generatedSubscription.value) {
+        navigator.clipboard.writeText(generatedSubscription.value)
+        alert('✅ 订阅内容已复制到剪贴板！\n\n请粘贴到代理客户端的订阅框中。')
+    } else {
+        alert('请先生成订阅')
+    }
 }
 
 const checkPing = async (item: Domain) => {
@@ -944,6 +955,26 @@ body {
   word-break: break-all;
   font-family: monospace;
   color: var(--code-color);
+}
+
+.result-status {
+  font-size: 0.95rem;
+  padding: 10px;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.result-actions {
+  margin-top: 15px;
+}
+
+.result-hint {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  opacity: 0.8;
+  text-align: center;
 }
 
 .speed-status-banner {
