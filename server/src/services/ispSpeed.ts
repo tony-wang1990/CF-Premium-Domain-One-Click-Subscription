@@ -221,10 +221,16 @@ export class IspSpeedService {
 
         console.log(`📊 Collecting ISP speed data for ${domains.length} domains...`);
 
-        // 取前20个主要域名进行采集
-        const topDomains = domains.slice(0, 20);
+        // 按类型分组，每类采集10个，确保所有类型都有数据
+        const officialDomains = domains.filter((d: any) => d.type === 'official' || !d.type).slice(0, 10);
+        const cmDomains = domains.filter((d: any) => d.type === 'cm').slice(0, 10);
+        const thirdPartyDomains = domains.filter((d: any) => d.type === 'third-party').slice(0, 10);
 
-        for (const domain of topDomains) {
+        const domainsToCollect = [...officialDomains, ...cmDomains, ...thirdPartyDomains];
+
+        console.log(`📊 Collecting: ${officialDomains.length} official, ${cmDomains.length} cm, ${thirdPartyDomains.length} third-party`);
+
+        for (const domain of domainsToCollect) {
             try {
                 const data = await this.getIspSpeed(domain.domain);
                 if (data) {
