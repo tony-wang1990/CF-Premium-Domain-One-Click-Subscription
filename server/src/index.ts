@@ -163,6 +163,34 @@ app.get('/api/isp-history/:domain', async (req, res) => {
     }
 });
 
+// 手动触发采集所有域名的三网数据
+app.get('/api/collect-now', async (req, res) => {
+    try {
+        console.log('🔄 Manual ISP data collection triggered...');
+        // 异步执行，立即返回
+        IspSpeedService.collectAndSaveAll().then(() => {
+            console.log('✅ Manual collection completed');
+        });
+        res.json({ success: true, message: 'ISP data collection started for all domains' });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 手动触发采集所有域名的三网数据
+app.get('/api/collect-now', async (req, res) => {
+    try {
+        console.log('🔄 Manual ISP data collection triggered...');
+        // 异步执行，立即返回
+        IspSpeedService.collectAndSaveAll().then(() => {
+            console.log('✅ Manual collection completed');
+        });
+        res.json({ success: true, message: 'ISP data collection started for all domains' });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.get('/api/network-status', async (req, res) => {
     const measureLatency = async (url: string) => {
         const start = Date.now();
