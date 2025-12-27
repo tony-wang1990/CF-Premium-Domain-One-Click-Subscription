@@ -235,38 +235,64 @@
                 </div>
               </div>
 
-              <!-- Right -->
+              <!-- Right: 24小时三网测速 (真实历史数据) -->
               <div class="monitor-right">
                 <div class="chart-header">
-                  <span class="chart-title">24小时ping (实时更新中)</span>
-                  <span class="chart-time">{{ new Date().toLocaleString() }}</span>
+                  <span class="chart-title">📊 24小时ping (数据每20分钟刷新一次)</span>
+                  <a :href="'https://www.itdog.cn/tcping/' + item.domain + ':443'" target="_blank" class="tcping-link">TCPing</a>
                 </div>
                 
+                <!-- 电信 -->
                 <div class="chart-row">
-                  <span class="chart-label">电信</span>
+                  <span class="chart-label ct">电信</span>
                   <div class="timeline-track">
-                     <div v-for="n in 40" :key="n" class="time-bit" :class="getBitClass(item.speed || 9999, n)"></div>
+                    <div v-for="(bit, idx) in getHistoryBits(item.domain, 'ct')" 
+                         :key="'ct-'+idx" 
+                         class="time-bit" 
+                         :class="bit.color"
+                         :title="'丢包率: ' + (bit.loss * 100).toFixed(1) + '%'">
+                    </div>
                   </div>
-                  <span class="chart-val">{{ item.speed ? item.speed + 'ms' : '--' }}</span>
+                  <span class="chart-val">{{ getIspAverage(item.domain, 'ct').latency }}/{{ getIspAverage(item.domain, 'ct').lossRate }}</span>
                 </div>
+
+                <!-- 移动 -->
                 <div class="chart-row">
-                  <span class="chart-label">移动</span>
+                  <span class="chart-label cm">移动</span>
                   <div class="timeline-track">
-                     <div v-for="n in 40" :key="n" class="time-bit" :class="getBitClass(item.speed || 9999, n, 0.9)"></div>
+                    <div v-for="(bit, idx) in getHistoryBits(item.domain, 'cm')" 
+                         :key="'cm-'+idx" 
+                         class="time-bit" 
+                         :class="bit.color"
+                         :title="'丢包率: ' + (bit.loss * 100).toFixed(1) + '%'">
+                    </div>
                   </div>
-                  <span class="chart-val">{{ item.speed ? Math.round(item.speed * 0.9) + 'ms' : '--' }}</span>
+                  <span class="chart-val">{{ getIspAverage(item.domain, 'cm').latency }}/{{ getIspAverage(item.domain, 'cm').lossRate }}</span>
                 </div>
+
+                <!-- 联通 -->
                 <div class="chart-row">
-                  <span class="chart-label">联通</span>
+                  <span class="chart-label cu">联通</span>
                   <div class="timeline-track">
-                     <div v-for="n in 40" :key="n" class="time-bit" :class="getBitClass(item.speed || 9999, n, 1.1)"></div>
+                    <div v-for="(bit, idx) in getHistoryBits(item.domain, 'cu')" 
+                         :key="'cu-'+idx" 
+                         class="time-bit" 
+                         :class="bit.color"
+                         :title="'丢包率: ' + (bit.loss * 100).toFixed(1) + '%'">
+                    </div>
                   </div>
-                  <span class="chart-val">{{ item.speed ? Math.round(item.speed * 1.1) + 'ms' : '--' }}</span>
+                  <span class="chart-val">{{ getIspAverage(item.domain, 'cu').latency }}/{{ getIspAverage(item.domain, 'cu').lossRate }}</span>
                 </div>
-                 <div class="chart-legend">
-                   <div class="legend-i"><span class="bit-sample green"></span> 丢包率 0%</div>
-                   <div class="legend-i"><span class="bit-sample yellow"></span> 0~10%</div>
-                   <div class="legend-i"><span class="bit-sample red"></span> >10%</div>
+
+                <div class="chart-footer">
+                     <div class="chart-legend">
+                       <div class="legend-title">丢包率:</div>
+                       <div class="legend-i"><span class="bit-sample green"></span> 0%</div>
+                       <div class="legend-i"><span class="bit-sample yellow"></span> 0~10%</div>
+                       <div class="legend-i"><span class="bit-sample red"></span> &gt;10%</div>
+                       <div class="legend-i"><span class="bit-sample gray"></span> 无数据</div>
+                    </div>
+                    <div class="chart-val-legend">平均延迟/丢包率</div>
                 </div>
               </div>
             </div>
@@ -304,38 +330,64 @@
                 </div>
               </div>
 
-              <!-- Right -->
+              <!-- Right: 24小时三网测速 (真实历史数据) -->
               <div class="monitor-right">
                 <div class="chart-header">
-                  <span class="chart-title">24小时ping (实时更新中)</span>
-                  <span class="chart-time">{{ new Date().toLocaleString() }}</span>
+                  <span class="chart-title">📊 24小时ping (数据每20分钟刷新一次)</span>
+                  <a :href="'https://www.itdog.cn/tcping/' + item.domain + ':443'" target="_blank" class="tcping-link">TCPing</a>
                 </div>
                 
+                <!-- 电信 -->
                 <div class="chart-row">
-                  <span class="chart-label">电信</span>
+                  <span class="chart-label ct">电信</span>
                   <div class="timeline-track">
-                     <div v-for="n in 40" :key="n" class="time-bit" :class="getBitClass(item.speed || 9999, n)"></div>
+                    <div v-for="(bit, idx) in getHistoryBits(item.domain, 'ct')" 
+                         :key="'ct-'+idx" 
+                         class="time-bit" 
+                         :class="bit.color"
+                         :title="'丢包率: ' + (bit.loss * 100).toFixed(1) + '%'">
+                    </div>
                   </div>
-                  <span class="chart-val">{{ item.speed ? item.speed + 'ms' : '--' }}</span>
+                  <span class="chart-val">{{ getIspAverage(item.domain, 'ct').latency }}/{{ getIspAverage(item.domain, 'ct').lossRate }}</span>
                 </div>
+
+                <!-- 移动 -->
                 <div class="chart-row">
-                  <span class="chart-label">移动</span>
+                  <span class="chart-label cm">移动</span>
                   <div class="timeline-track">
-                     <div v-for="n in 40" :key="n" class="time-bit" :class="getBitClass(item.speed || 9999, n, 0.9)"></div>
+                    <div v-for="(bit, idx) in getHistoryBits(item.domain, 'cm')" 
+                         :key="'cm-'+idx" 
+                         class="time-bit" 
+                         :class="bit.color"
+                         :title="'丢包率: ' + (bit.loss * 100).toFixed(1) + '%'">
+                    </div>
                   </div>
-                  <span class="chart-val">{{ item.speed ? Math.round(item.speed * 0.9) + 'ms' : '--' }}</span>
+                  <span class="chart-val">{{ getIspAverage(item.domain, 'cm').latency }}/{{ getIspAverage(item.domain, 'cm').lossRate }}</span>
                 </div>
+
+                <!-- 联通 -->
                 <div class="chart-row">
-                  <span class="chart-label">联通</span>
+                  <span class="chart-label cu">联通</span>
                   <div class="timeline-track">
-                     <div v-for="n in 40" :key="n" class="time-bit" :class="getBitClass(item.speed || 9999, n, 1.1)"></div>
+                    <div v-for="(bit, idx) in getHistoryBits(item.domain, 'cu')" 
+                         :key="'cu-'+idx" 
+                         class="time-bit" 
+                         :class="bit.color"
+                         :title="'丢包率: ' + (bit.loss * 100).toFixed(1) + '%'">
+                    </div>
                   </div>
-                  <span class="chart-val">{{ item.speed ? Math.round(item.speed * 1.1) + 'ms' : '--' }}</span>
+                  <span class="chart-val">{{ getIspAverage(item.domain, 'cu').latency }}/{{ getIspAverage(item.domain, 'cu').lossRate }}</span>
                 </div>
-                 <div class="chart-legend">
-                   <div class="legend-i"><span class="bit-sample green"></span> 丢包率 0%</div>
-                   <div class="legend-i"><span class="bit-sample yellow"></span> 0~10%</div>
-                   <div class="legend-i"><span class="bit-sample red"></span> >10%</div>
+
+                <div class="chart-footer">
+                     <div class="chart-legend">
+                       <div class="legend-title">丢包率:</div>
+                       <div class="legend-i"><span class="bit-sample green"></span> 0%</div>
+                       <div class="legend-i"><span class="bit-sample yellow"></span> 0~10%</div>
+                       <div class="legend-i"><span class="bit-sample red"></span> &gt;10%</div>
+                       <div class="legend-i"><span class="bit-sample gray"></span> 无数据</div>
+                    </div>
+                    <div class="chart-val-legend">平均延迟/丢包率</div>
                 </div>
               </div>
             </div>
