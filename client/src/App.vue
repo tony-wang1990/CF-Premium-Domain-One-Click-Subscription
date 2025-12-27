@@ -41,6 +41,26 @@
           </n-button>
         </div>
 
+        <!-- 🔥 醒目的全局测速提示 -->
+        <div class="speed-test-banner" v-if="!hasTestedSpeed">
+          <div class="banner-content">
+            <span class="banner-icon">🚀</span>
+            <div class="banner-text">
+              <strong>第一步：点击测速</strong>
+              <p>测试您的网络到各CF域名的延迟，找出最快的节点</p>
+            </div>
+            <n-button type="warning" size="large" @click="pingAll" :loading="isGlobalPinging">
+              {{ isGlobalPinging ? '测速中...' : '🚀 开始全局测速' }}
+            </n-button>
+          </div>
+        </div>
+        <div class="speed-test-done" v-else>
+          <span>✅ 已测速 {{ testedCount }} 个域名</span>
+          <n-button size="small" type="info" dashed @click="pingAll" :loading="isGlobalPinging">
+            重新测速
+          </n-button>
+        </div>
+
         <!-- Search & Filter Section -->
         <div class="filter-section glass-panel">
            <div class="search-box">
@@ -53,10 +73,7 @@
              <span class="filter-tag" :class="{ active: filterType === 'cm' }" @click="filterType = 'cm'">移动直连</span>
              <span class="filter-tag" :class="{ active: filterType === 'third-party' }" @click="filterType = 'third-party'">第三方</span>
            </div>
-           <n-button size="small" type="warning" dashed @click="pingAll" :loading="isGlobalPinging" class="ping-all-btn">
-             🚀 全局测速
-           </n-button>
-           <div class="sort-controls" style="margin-left: 10px; display: flex; gap: 5px;">
+           <div class="sort-controls" style="margin-left: auto; display: flex; gap: 5px;">
              <n-button size="small" dashed :type="sortBy === 'default' ? 'info' : 'default'" @click="sortBy = 'default'">
                 默认排序
              </n-button>
@@ -533,6 +550,10 @@ const userSpeedCount = computed(() => {
   return domains.value.filter((d: Domain) => d.realPing !== undefined && d.realPing > 0).length
 })
 
+// Check if user has tested any domains
+const hasTestedSpeed = computed(() => userSpeedCount.value > 0)
+const testedCount = computed(() => userSpeedCount.value)
+
 const lastUpdateTime = computed(() => {
     if (domains.value.length > 0) {
         return new Date(domains.value[0].updatedAt).toLocaleString()
@@ -921,6 +942,61 @@ body {
 .theme-toggle-btn {
   margin-right: 15px;
   font-size: 1.2rem;
+}
+
+/* 🔥 Speed Test Banner Styles */
+.speed-test-banner {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  border-radius: 12px;
+  padding: 20px 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.banner-icon {
+  font-size: 2.5rem;
+}
+
+.banner-text {
+  flex: 1;
+  min-width: 200px;
+}
+
+.banner-text strong {
+  display: block;
+  font-size: 1.2rem;
+  color: white;
+  margin-bottom: 5px;
+}
+
+.banner-text p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+}
+
+.speed-test-done {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 8px;
+  padding: 12px 20px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.speed-test-done span {
+  color: #22c55e;
+  font-weight: 500;
 }
 
 /* Update previous styles to use variables */

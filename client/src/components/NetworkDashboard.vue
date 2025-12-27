@@ -32,8 +32,8 @@
               <span class="site-name">{{ site.name }}</span>
             </div>
             <div class="site-stat">
-              <span class="latency-ms" :class="getLatencyClass(site.latency)">
-                {{ site.latency === -1 ? '超时' : (site.latency ? site.latency + 'ms' : '测试中...') }}
+              <span class="latency-ms" :class="getLatencyClass(site.latency, site.type)">
+                {{ getLatencyText(site.latency, site.type) }}
               </span>
               <n-tag size="tiny" :type="site.type === '国内' ? 'success' : 'info'" bordered>
                 {{ site.type }}
@@ -222,11 +222,25 @@ const fetchNetworkStatus = async () => {
     }
 }
 
-const getLatencyClass = (ms: number) => {
-  if (ms === -1) return 'text-gray'
+const getLatencyClass = (ms: number, type?: string) => {
+  if (ms === -1) {
+    // 国际网站超时显示为"需代理"，样式为紫色
+    if (type === '国际') return 'text-purple'
+    return 'text-gray'
+  }
   if (ms < 100) return 'text-green'
   if (ms < 300) return 'text-yellow'
   return 'text-red'
+}
+
+const getLatencyText = (ms: number, type: string) => {
+  if (ms === 0) return '测试中...'
+  if (ms === -1) {
+    // 国际网站超时显示为"需代理"
+    if (type === '国际') return '需代理'
+    return '超时'
+  }
+  return ms + 'ms'
 }
 
 const getLatencyColor = (ms: number) => {
@@ -468,4 +482,5 @@ onMounted(() => {
 .text-yellow { color: #f59e0b; }
 .text-red { color: #ef4444; }
 .text-gray { color: #9ca3af; }
+.text-purple { color: #a855f7; font-weight: bold; } /* 需代理 */
 </style>
