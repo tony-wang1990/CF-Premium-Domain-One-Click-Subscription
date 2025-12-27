@@ -59,8 +59,8 @@
         </div>
         <div class="speed-test-done" v-else>
           <span>✅ 已测速 {{ testedCount }} 个域名，点击"按延迟排序"查看最快节点</span>
-          <button class="retest-btn" @click="pingAll" :disabled="isGlobalPinging">
-            {{ isGlobalPinging ? '测速中...' : '🔄 重新测速' }}
+          <button class="big-retest-btn" @click="pingAll" :disabled="isGlobalPinging">
+            {{ isGlobalPinging ? '⏳ 测速中...' : '🔄 重新测速' }}
           </button>
         </div>
 
@@ -1219,6 +1219,30 @@ body {
 
 .retest-btn:disabled {
   opacity: 0.7;
+  cursor: wait;
+}
+
+/* 大号重新测速按钮 */
+.big-retest-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 30px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.big-retest-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
+
+.big-retest-btn:disabled {
+  opacity: 0.9;
   cursor: wait;
 }
 
