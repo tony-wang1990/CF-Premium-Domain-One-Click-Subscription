@@ -117,73 +117,99 @@ const ipInfos = ref<Record<string, IpInfo>>({
 })
 
 const sites = ref<Site[]>([
-  { name: '字节跳动', icon: '🎵', type: '国内', url: '', latency: 0 },
-  { name: 'Bilibili', icon: '📺', type: '国内', url: '', latency: 0 },
-  { name: '微信', icon: '💬', type: '国内', url: '', latency: 0 },
-  { name: '淘宝', icon: '🛍️', type: '国内', url: '', latency: 0 },
-  { name: 'GitHub', icon: '🐙', type: '国际', url: '', latency: 0 },
-  { name: 'Google', icon: '🔍', type: '国际', url: '', latency: 0 },
-  { name: 'Cloudflare', icon: '☁️', type: '国际', url: '', latency: 0 },
-  { name: 'YouTube', icon: '▶️', type: '国际', url: '', latency: 0 },
+  { name: '字节跳动', icon: '🎵', type: '国内', url: 'https://www.douyin.com', latency: 0 },
+  { name: 'Bilibili', icon: '📺', type: '国内', url: 'https://www.bilibili.com', latency: 0 },
+  { name: '微信', icon: '💬', type: '国内', url: 'https://www.qq.com', latency: 0 },
+  { name: '淘宝', icon: '🛍️', type: '国内', url: 'https://www.taobao.com', latency: 0 },
+  { name: 'GitHub', icon: '🐙', type: '国际', url: 'https://github.com', latency: 0 },
+  { name: 'Google', icon: '🔍', type: '国际', url: 'https://www.google.com', latency: 0 },
+  { name: 'Cloudflare', icon: '☁️', type: '国际', url: 'https://www.cloudflare.com', latency: 0 },
+  { name: 'YouTube', icon: '▶️', type: '国际', url: 'https://www.youtube.com', latency: 0 },
 ])
 
 const fetchNetworkStatus = async () => {
     try {
-        // Use backend for IP detection (bypass CORS and GFW restrictions)
-        const res = await fetch('/api/network-status')
-        const data = await res.json()
+        // ========== 客户端IP检测 ==========
+        // 使用多个API，简化显示
         
-        // Update IPs from backend
-        if(data.ip) {
-            if(data.ip.domestic) { 
-                ipInfos.value.domestic.ip = data.ip.domestic.ip
-                ipInfos.value.domestic.location = data.ip.domestic.location 
+        // 1. 尝试获取公网IP（使用多个备选API）
+        const getClientIp = async () => {
+            // API列表（按可靠性排序）
+            const apis = [
+                { url: 'https://api.ipify.org?format=json', parser: (d: any) => d.ip },
+                { url: 'https://api.ip.sb/ip', parser: (d: string) => d.trim() },
+                { url: 'https://icanhazip.com', parser: (d: string) => d.trim() },
+            ]
+            
+            for (const api of apis) {
+                try {
+                    const res = await fetch(api.url, { 
+                        signal: AbortSignal.timeout(3000)
+                    })
+                    const data = res.headers.get('content-type')?.includes('json') 
+                        ? await res.json() 
+                        : await res.text()
+                    const ip = api.parser(data)
+                    if (ip && ip !== '' && !ip.includes('error')) {
+                        return ip
+                    }
+                } catch {
+                    continue
+                }
             }
-            if(data.ip.abroad) { 
-                ipInfos.value.abroad.ip = data.ip.abroad.ip
-                ipInfos.value.abroad.location = data.ip.abroad.location 
-            }
-            if(data.ip.cloudflare) { 
-                ipInfos.value.cloudflare.ip = data.ip.cloudflare.ip
-                ipInfos.value.cloudflare.location = data.ip.cloudflare.location 
-            }
-            if(data.ip.leak) { 
-                ipInfos.value.leak.ip = data.ip.leak.ip
-                ipInfos.value.leak.location = data.ip.leak.location 
-            }
-            if(data.ip.ipApi) { 
-                ipInfos.value.ipApi.ip = data.ip.ipApi.ip
-                ipInfos.value.ipApi.location = data.ip.ipApi.location 
-            }
-            if(data.ip.aws) { 
-                ipInfos.value.aws.ip = data.ip.aws.ip
-                ipInfos.value.aws.location = data.ip.aws.location 
+            return '检测失败'
+        }
+        
+        // 2. 获取CF节点信息
+        const getCfInfo = async () => {
+            try {
+                const res = await fetch('https://www.cloudflare.com/cdn-cgi/trace', {
+                    signal: AbortSignal.timeout(3000)
+                })
+                const text = await res.text()
+                const locLine = text.split('\n').find(l => l.startsWith('loc='))
+                return locLine?.split('=')[1] || 'Unknown'
+            } catch {
+                return 'Unknown'
             }
         }
+        
+        // 并行获取
+        const [userIp, cfLoc] = await Promise.all([
+            getClientIp(),
+            getCfInfo()
+        ])
+        
+        ipInfos.value.domestic.ip = userIp
+        ipInfos.value.domestic.location = '您的公网IP'
+        ipInfos.value.cloudflare.ip = ''
+        ipInfos.value.cloudflare.location = cfLoc ? `CF节点: ${cfLoc}` : ''
 
-        // Client-side latency testing (measure real connection time from browser)
+        // ========== 客户端延迟测试 ==========
         const measureBrowserLatency = async (url: string) => {
             try {
                 const start = performance.now()
                 const controller = new AbortController()
                 const timeoutId = setTimeout(() => controller.abort(), 5000)
                 
-                await fetch(url, { 
-                    method: 'HEAD', 
-                    mode: 'no-cors',
-                    cache: 'no-cache',
-                    signal: controller.signal
+                // 使用Image加载测试（更可靠）
+                await new Promise<void>((resolve, reject) => {
+                    const img = new Image()
+                    img.onload = () => resolve()
+                    img.onerror = () => resolve() // 错误也算连通
+                    setTimeout(() => reject(), 5000)
+                    img.src = `${url}/favicon.ico?t=${Date.now()}`
                 })
                 
                 clearTimeout(timeoutId)
                 const end = performance.now()
                 return Math.round(end - start)
-            } catch (error) {
+            } catch {
                 return -1
             }
         }
 
-        // Test latency to popular sites from the user's browser
+        // 测试网站延迟
         const latencyTests = sites.value.map(async (site) => {
             const url = site.url || `https://${site.name.toLowerCase()}.com`
             site.latency = await measureBrowserLatency(url)
