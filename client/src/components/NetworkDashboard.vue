@@ -185,42 +185,61 @@ const fetchNetworkStatus = async () => {
         ipInfos.value.cloudflare.ip = ''
         ipInfos.value.cloudflare.location = cfLoc ? `CF节点: ${cfLoc}` : ''
 
-        // ========== 客户端延迟测试 ==========
-        const measureBrowserLatency = async (url: string) => {
-            try {
-                const start = performance.now()
-                const controller = new AbortController()
-                const timeoutId = setTimeout(() => controller.abort(), 5000)
-                
-                // 使用Image加载测试（更可靠）
-                await new Promise<void>((resolve, reject) => {
-                    const img = new Image()
-                    img.onload = () => resolve()
-                    img.onerror = () => resolve() // 错误也算连通
-                    setTimeout(() => reject(), 5000)
-                    img.src = `${url}/favicon.ico?t=${Date.now()}`
-                })
-                
-                clearTimeout(timeoutId)
-                const end = performance.now()
-                return Math.round(end - start)
-            } catch {
-                return -1
-            }
-        }
-
-        // 测试网站延迟
-        const latencyTests = sites.value.map(async (site) => {
-            const url = site.url || `https://${site.name.toLowerCase()}.com`
-            site.latency = await measureBrowserLatency(url)
-        })
-
-        await Promise.all(latencyTests)
+        // 启动实时延迟测试
+        startLatencyTest()
 
     } catch(e) {
         console.error('Failed to fetch network status', e)
     }
 }
+
+// ========== 实时延迟测试 ==========
+let latencyInterval: number | null = null
+
+const measureLatency = async (url: string) => {
+    try {
+        const start = performance.now()
+        
+        // 使用fetch HEAD请求，更精准
+        await fetch(url, {
+            method: 'HEAD',
+            mode: 'no-cors',
+            cache: 'no-store',
+            signal: AbortSignal.timeout(3000) // 3秒超时
+        })
+        
+        const end = performance.now()
+        return Math.round(end - start)
+    } catch {
+        return -1
+    }
+}
+
+const testAllLatencies = async () => {
+    // 并行测试所有网站
+    const promises = sites.value.map(async (site) => {
+        const latency = await measureLatency(site.url)
+        site.latency = latency
+    })
+    await Promise.all(promises)
+}
+
+const startLatencyTest = () => {
+    // 立即测试一次
+    testAllLatencies()
+    
+    // 每8秒自动刷新
+    if (latencyInterval) clearInterval(latencyInterval)
+    latencyInterval = window.setInterval(() => {
+        testAllLatencies()
+    }, 8000)
+}
+
+// 组件卸载时清理
+import { onUnmounted } from 'vue'
+onUnmounted(() => {
+    if (latencyInterval) clearInterval(latencyInterval)
+})
 
 const getLatencyClass = (ms: number, type?: string) => {
   if (ms === -1) {
