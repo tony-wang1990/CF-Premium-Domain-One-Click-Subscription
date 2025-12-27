@@ -560,10 +560,11 @@ const getIspData = (domain: string, isp: 'ct' | 'cm' | 'cu') => {
     }
 }
 
-// 批量获取三网数据
+// 批量获取三网数据（所有域名）
 const fetchBatchIspSpeed = async () => {
     try {
-        const domainList = domains.value.slice(0, 20).map(d => d.domain) // 前20个域名
+        const domainList = domains.value.map(d => d.domain) // 获取所有域名
+        console.log(`📊 Fetching ISP speed for ${domainList.length} domains...`)
         const res = await fetch('/api/isp-speed/batch', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -600,12 +601,14 @@ const fetchIspHistory = async (domain: string) => {
     }
 }
 
-// 批量获取历史数据
+// 批量获取历史数据（所有域名）
 const fetchBatchIspHistory = async () => {
-    const domainList = domains.value.slice(0, 20).map(d => d.domain)
+    const domainList = domains.value.map(d => d.domain) // 获取所有域名
+    console.log(`📊 Fetching ISP history for ${domainList.length} domains...`)
     for (const domain of domainList) {
         await fetchIspHistory(domain)
     }
+    console.log('✅ ISP history loaded')
 }
 
 // 获取历史数据用于图表显示（返回72个点，不足的补灰色）
