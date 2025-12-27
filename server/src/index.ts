@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { CollectorService } from './services/collector.js';
 import { SubscriptionService } from './services/subscription.js';
+import { IspSpeedService } from './services/ispSpeed.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -85,6 +86,69 @@ app.get('/api/subscribe', async (req, res) => {
         res.send(result);
     } catch (e: any) {
         res.status(500).send(e.message);
+    }
+});
+
+// ========== 三网测速 API ==========
+
+// 获取域名的三网测速数据
+app.get('/api/isp-speed/:domain', async (req, res) => {
+    try {
+        const domain = req.params.domain;
+        const data = await IspSpeedService.getIspSpeed(domain);
+        res.json({ success: true, domain, data });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// 获取电信优选IP
+app.get('/api/ct', async (req, res) => {
+    try {
+        const count = parseInt(req.query.ips as string) || 6;
+        const ips = await IspSpeedService.getOptimizedIps('ct', count);
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.send(ips.join('\n'));
+    } catch (e: any) {
+        res.status(500).send(e.message);
+    }
+});
+
+// 获取移动优选IP
+app.get('/api/cmcc', async (req, res) => {
+    try {
+        const count = parseInt(req.query.ips as string) || 6;
+        const ips = await IspSpeedService.getOptimizedIps('cm', count);
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.send(ips.join('\n'));
+    } catch (e: any) {
+        res.status(500).send(e.message);
+    }
+});
+
+// 获取联通优选IP
+app.get('/api/cu', async (req, res) => {
+    try {
+        const count = parseInt(req.query.ips as string) || 6;
+        const ips = await IspSpeedService.getOptimizedIps('cu', count);
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.send(ips.join('\n'));
+    } catch (e: any) {
+        res.status(500).send(e.message);
+    }
+});
+
+// 批量获取三网数据
+app.post('/api/isp-speed/batch', async (req, res) => {
+    try {
+        const { domains } = req.body;
+        if (!domains || !Array.isArray(domains)) {
+            return res.status(400).json({ error: 'domains array required' });
+        }
+        const results = await IspSpeedService.getBatchIspSpeed(domains);
+        res.json({ success: true, data: Object.fromEntries(results) });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
     }
 });
 
