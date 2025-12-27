@@ -931,10 +931,25 @@ const getPingHistory = (domain: string): { time: number; latency: number }[] => 
 }
 
 const pingAll = async () => {
+    // 确保域名已加载
+    if (domains.value.length === 0) {
+        console.log('Domains not loaded yet, fetching...')
+        await fetchDomains()
+    }
+    
+    if (domains.value.length === 0) {
+        console.warn('No domains available for testing')
+        return
+    }
+    
     isGlobalPinging.value = true
+    console.log(`Starting global ping test for ${domains.value.length} domains...`)
+    
     const pings = domains.value.map(d => checkPing(d))
     await Promise.allSettled(pings)
+    
     isGlobalPinging.value = false
+    console.log('Global ping test completed')
 }
 
 const getPingColor = (ms: number) => {
